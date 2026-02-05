@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (themeToggle) {
-    themeToggle.textContent = document.body.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
     themeToggle.addEventListener('click', () => {
       document.body.classList.toggle('dark');
       const isDark = document.body.classList.contains('dark');
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Dashboard summary cards use static seed values (demo mode) with simulated UI-only fluctuations.
+  // Dashboard summary card data and fake real-time updates.
   const counts = {
     totalDevices: document.getElementById('totalDevices'),
     activeDevices: document.getElementById('activeDevices'),
