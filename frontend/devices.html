@@ -4,13 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connected Devices | Securing LAN Monitoring System</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div class="app-shell">
+
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <h3>LAN Secure UI</h3>
       <nav>
@@ -23,6 +27,7 @@
       </nav>
     </aside>
 
+    <!-- Main -->
     <div class="main-content">
       <header class="topbar">
         <button id="sidebarToggle" class="btn btn-light mobile-only">☰</button>
@@ -33,6 +38,7 @@
         <button id="themeToggle" class="btn btn-light">Dark Mode</button>
       </header>
 
+      <!-- Devices Table -->
       <section class="table-wrapper">
         <table>
           <thead>
@@ -44,17 +50,28 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody id="deviceTableBody"></tbody>
+          <tbody id="deviceTableBody">
+            <!-- Dynamic rows injected here -->
+          </tbody>
         </table>
       </section>
 
       <footer class="footer">
-        <p><strong>Student Name:</strong> Your Name | <strong>Roll No:</strong> 12345 | <strong>Department:</strong> CSE | <strong>College Name:</strong> Your College</p>
+        <p>
+          <strong>Student Name:</strong> Your Name |
+          <strong>Roll No:</strong> 12345 |
+          <strong>Department:</strong> CSE |
+          <strong>College Name:</strong> Your College
+        </p>
       </footer>
     </div>
   </div>
 
+  <!-- Shared UI logic -->
+  <script src="js/config.js"></script>
   <script src="js/main.js"></script>
+
+  <!-- Devices dynamic logic -->
   <script src="js/devices.js"></script>
 </body>
 </html>

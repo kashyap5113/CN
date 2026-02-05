@@ -1,10 +1,17 @@
 // Shared frontend behavior for login, dashboard, and responsive navigation.
+
 document.addEventListener('DOMContentLoaded', () => {
+
+  /* ===============================
+     THEME & UI CONTROLS
+  =============================== */
+
   const themeToggle = document.getElementById('themeToggle');
   const sidebarToggle = document.getElementById('sidebarToggle');
   const sidebar = document.getElementById('sidebar');
   const loadingOverlay = document.getElementById('loadingOverlay');
 
+  // Load saved theme
   if (localStorage.getItem('lanTheme') === 'dark') {
     document.body.classList.add('dark');
   }
@@ -19,14 +26,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (sidebarToggle && sidebar) {
-    sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
   }
 
   if (loadingOverlay) {
     setTimeout(() => loadingOverlay.classList.add('hide'), 1200);
   }
 
-  // Login form validation for demo authentication.
+  /* ===============================
+     LOGIN (DEMO AUTH)
+  =============================== */
+
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
     loginForm.addEventListener('submit', (event) => {
@@ -43,7 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Dashboard summary card data and fake real-time updates.
+  /* ===============================
+     DASHBOARD LIVE DATA
+  =============================== */
+
   const counts = {
     totalDevices: document.getElementById('totalDevices'),
     activeDevices: document.getElementById('activeDevices'),
@@ -51,31 +66,46 @@ document.addEventListener('DOMContentLoaded', () => {
     blockedCount: document.getElementById('blockedCount')
   };
 
-  if (counts.totalDevices) {
-    let dashboardData = { total: 28, active: 21, threats: 3, blocked: 4 };
+  const liveStatus = document.getElementById('liveStatus');
 
-    const renderDashboard = () => {
-      counts.totalDevices.textContent = dashboardData.total;
-      counts.activeDevices.textContent = dashboardData.active;
-      counts.threatCount.textContent = dashboardData.threats;
-      counts.blockedCount.textContent = dashboardData.blocked;
-    };
+  // Only run dashboard logic if dashboard elements exist
+  if (counts.totalDevices && counts.activeDevices) {
 
-    renderDashboard();
+    async function updateDashboard() {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/devices');
+        if (!res.ok) throw new Error('Backend error');
 
-    const liveStatus = document.getElementById('liveStatus');
-    setInterval(() => {
-      dashboardData.active = Math.max(15, Math.min(28, dashboardData.active + (Math.random() > 0.5 ? 1 : -1)));
-      dashboardData.threats = Math.max(0, Math.min(7, dashboardData.threats + (Math.random() > 0.7 ? 1 : -1)));
-      renderDashboard();
+        const data = await res.json();
 
-      if (dashboardData.threats > 4) {
-        liveStatus.textContent = '🔴 Threat Detected';
-        liveStatus.className = 'status threat';
-      } else {
-        liveStatus.textContent = '🟢 Network Secure';
-        liveStatus.className = 'status secure';
+        // Map backend fields EXACTLY
+        counts.totalDevices.textContent = data.total ?? 0;
+        counts.activeDevices.textContent = data.active ?? 0;
+        counts.threatCount.textContent = data.risk ?? 0;
+        counts.blockedCount.textContent = data.blocked ?? 0;
+
+        if (liveStatus) {
+          if ((data.risk ?? 0) > 0) {
+            liveStatus.textContent = '🔴 Threat Detected';
+            liveStatus.className = 'status threat';
+          } else {
+            liveStatus.textContent = '🟢 Network Secure';
+            liveStatus.className = 'status secure';
+          }
+        }
+
+      } catch (error) {
+        console.error('Dashboard update failed:', error);
+        if (liveStatus) {
+          liveStatus.textContent = '⚠️ Data Sync Error';
+          liveStatus.className = 'status';
+        }
       }
-    }, 3000);
+    }
+
+    // Initial load + periodic refresh
+    updateDashboard();
+    setInterval(updateDashboard, 5000);
   }
+
 });

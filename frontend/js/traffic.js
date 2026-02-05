@@ -1,57 +1,119 @@
-// Pure JS traffic visualizations using Chart.js and periodic data refresh.
+function getCurrentTime() {
+  const now = new Date();
+  return now.toLocaleTimeString();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   if (typeof Chart === 'undefined') return;
 
-  const labels = ['10:00', '10:05', '10:10', '10:15', '10:20', '10:25'];
+  const MAX_POINTS = 10;
 
-  const bandwidthChart = new Chart(document.getElementById('bandwidthChart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Mbps',
-        data: [42, 55, 49, 63, 58, 61],
-        borderColor: '#38bdf8',
-        backgroundColor: 'rgba(56,189,248,0.2)',
-        fill: true,
-        tension: 0.3
-      }]
+  const labels = [];
+
+  const bandwidthData = [];
+  const packetData = [];
+
+  const bandwidthChart = new Chart(
+    document.getElementById('bandwidthChart'),
+    {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Mbps',
+            data: bandwidthData,
+            borderColor: '#38bdf8',
+            backgroundColor: 'rgba(56,189,248,0.25)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        animation: false,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
     }
-  });
+  );
 
-  const packetChart = new Chart(document.getElementById('packetChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Packets/s',
-        data: [1200, 1500, 1320, 1700, 1650, 1580],
-        backgroundColor: '#1e293b'
-      }]
+  const packetChart = new Chart(
+    document.getElementById('packetChart'),
+    {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Packets/s',
+            data: packetData,
+            backgroundColor: '#1e293b'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        animation: false,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
     }
-  });
+  );
 
-  const protocolChart = new Chart(document.getElementById('protocolChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['TCP', 'UDP', 'ICMP'],
-      datasets: [{
-        data: [65, 25, 10],
-        backgroundColor: ['#1e293b', '#38bdf8', '#ef4444']
-      }]
+  const protocolChart = new Chart(
+    document.getElementById('protocolChart'),
+    {
+      type: 'doughnut',
+      data: {
+        labels: ['TCP', 'UDP', 'ICMP'],
+        datasets: [
+          {
+            data: [60, 30, 10],
+            backgroundColor: ['#1e293b', '#38bdf8', '#ef4444']
+          }
+        ]
+      },
+      options: {
+        responsive: true
+      }
     }
-  });
+  );
 
-  setInterval(() => {
-    bandwidthChart.data.datasets[0].data = bandwidthChart.data.datasets[0].data.map((v) => Math.max(20, v + (Math.random() * 10 - 5)));
-    packetChart.data.datasets[0].data = packetChart.data.datasets[0].data.map((v) => Math.max(600, v + Math.round(Math.random() * 300 - 150)));
+  function updateCharts() {
+    const time = getCurrentTime();
 
-    const tcp = Math.round(55 + Math.random() * 20);
-    const udp = Math.round(20 + Math.random() * 20);
-    protocolChart.data.datasets[0].data = [tcp, udp, Math.max(5, 100 - tcp - udp)];
+    const bandwidth = Math.floor(40 + Math.random() * 30); // Mbps
+    const packets = Math.floor(800 + Math.random() * 700); // packets/s
+
+    labels.push(time);
+    bandwidthData.push(bandwidth);
+    packetData.push(packets);
+
+    if (labels.length > MAX_POINTS) {
+      labels.shift();
+      bandwidthData.shift();
+      packetData.shift();
+    }
+
+    const tcp = Math.floor(50 + Math.random() * 25);
+    const udp = Math.floor(20 + Math.random() * 20);
+    const icmp = Math.max(5, 100 - tcp - udp);
+
+    protocolChart.data.datasets[0].data = [tcp, udp, icmp];
 
     bandwidthChart.update();
     packetChart.update();
     protocolChart.update();
-  }, 4000);
+  }
+
+  // Initial fill
+  for (let i = 0; i < 5; i++) updateCharts();
+
+  // Live update every 3 seconds
+  setInterval(updateCharts, 3000);
 });

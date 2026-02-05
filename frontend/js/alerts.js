@@ -3,33 +3,49 @@ document.addEventListener('DOMContentLoaded', () => {
   const alertsContainer = document.getElementById('alertsContainer');
   const blockedContainer = document.getElementById('blockedContainer');
 
-  const alerts = [
-    { attack: 'Port Scanning', sourceIp: '172.16.0.12', time: '10:14 AM', severity: 'Low' },
-    { attack: 'ARP Spoofing', sourceIp: '172.16.0.39', time: '10:19 AM', severity: 'Medium' },
-    { attack: 'DDoS Attempt', sourceIp: '203.10.88.4', time: '10:31 AM', severity: 'High' }
-  ];
+  let alerts = [];
+  let blockedDevices = [];
 
-  let blockedDevices = [
-    { ip: '192.168.1.66', mac: '00:1A:2B:3C:4D:99' },
-    { ip: '192.168.1.72', mac: '00:1A:2B:3C:4D:88' }
-  ];
-
-  if (alertsContainer) {
-    alertsContainer.innerHTML = alerts
-      .map(
-        (alert, index) => `
-        <article class="alert-card severity-${alert.severity.toLowerCase()}" style="animation-delay:${index * 0.12}s">
-          <h3>${alert.attack}</h3>
-          <p><strong>Source IP:</strong> ${alert.sourceIp}</p>
-          <p><strong>Time:</strong> ${alert.time}</p>
-          <p><strong>Severity:</strong> ${alert.severity}</p>
-        </article>`
-      )
-      .join('');
+  async function fetchAlerts() {
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/alerts');
+      const data = await res.json();
+      alerts = data.alerts || [];
+      renderAlerts();
+    } catch (e) {
+      if (alertsContainer) alertsContainer.innerHTML = '<p>Failed to load alerts from backend.</p>';
+    }
   }
 
-  if (blockedContainer) {
-    const renderBlocked = () => {
+  async function fetchBlocked() {
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/blocked');
+      const data = await res.json();
+      blockedDevices = data.blocked || [];
+      renderBlocked();
+    } catch (e) {
+      if (blockedContainer) blockedContainer.innerHTML = '<p>Failed to load blocked devices from backend.</p>';
+    }
+  }
+
+  function renderAlerts() {
+    if (alertsContainer) {
+      alertsContainer.innerHTML = alerts
+        .map(
+          (alert, index) => `
+          <article class="alert-card severity-${(alert.severity || '').toLowerCase()}" style="animation-delay:${index * 0.12}s">
+            <h3>${alert.attack || alert.type || 'Alert'}</h3>
+            <p><strong>Source IP:</strong> ${alert.sourceIp || alert.ip || ''}</p>
+            <p><strong>Time:</strong> ${alert.time || ''}</p>
+            <p><strong>Severity:</strong> ${alert.severity || ''}</p>
+          </article>`
+        )
+        .join('');
+    }
+  }
+
+  function renderBlocked() {
+    if (blockedContainer) {
       blockedContainer.innerHTML = blockedDevices
         .map(
           (device, index) => `
@@ -42,21 +58,20 @@ document.addEventListener('DOMContentLoaded', () => {
           </article>`
         )
         .join('');
-    };
+    }
+  }
 
-    renderBlocked();
-
-    blockedContainer.addEventListener('click', (event) => {
+  if (blockedContainer) {
+    blockedContainer.addEventListener('click', async (event) => {
       const button = event.target.closest('button[data-index]');
       if (!button) return;
-
       const index = Number(button.dataset.index);
       const selected = blockedDevices[index];
       const confirmed = confirm(`Unblock ${selected.ip} (${selected.mac})?`);
       if (!confirmed) return;
-
-      blockedDevices = blockedDevices.filter((_, itemIndex) => itemIndex !== index);
-      renderBlocked();
+      // Optionally implement unblock API if backend supports it
+      // For now, just refresh list
+      fetchBlocked();
     });
   }
 });

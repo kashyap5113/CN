@@ -1,45 +1,86 @@
-// Dummy device inventory rendered directly in table rows.
-document.addEventListener('DOMContentLoaded', () => {
-  const deviceTableBody = document.getElementById('deviceTableBody');
-  if (!deviceTableBody) return;
+document.addEventListener("DOMContentLoaded", () => {
+  const tableBody = document.getElementById("deviceTableBody");
+  if (!tableBody) return;
 
-  const devices = [
-    { name: 'Faculty-PC-01', ip: '192.168.1.10', mac: '00:1A:2B:3C:4D:11', status: 'Active' },
-    { name: 'Lab-Switch-03', ip: '192.168.1.14', mac: '00:1A:2B:3C:4D:22', status: 'Idle' },
-    { name: 'Unknown-Device', ip: '192.168.1.66', mac: '00:1A:2B:3C:4D:99', status: 'Risk' },
-    { name: 'Admin-Laptop', ip: '192.168.1.7', mac: '00:1A:2B:3C:4D:44', status: 'Active' }
-  ];
+  let devices = [];
 
-  const statusClassMap = {
-    Active: 'status-active',
-    Idle: 'status-idle',
-    Risk: 'status-risk'
-  };
+  async function fetchDevices() {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/devices");
+      if (!res.ok) throw new Error("API error");
 
-  const renderDevices = () => {
-    deviceTableBody.innerHTML = devices
-      .map(
-        (device, index) => `
-        <tr>
-          <td>${device.name}</td>
-          <td>${device.ip}</td>
-          <td>${device.mac}</td>
-          <td><span class="status-pill ${statusClassMap[device.status]}">${device.status}</span></td>
-          <td><button class="btn btn-danger" data-index="${index}">Block</button></td>
-        </tr>`
-      )
-      .join('');
-  };
+      const data = await res.json();
+      devices = data.devices || [];
+      renderDevices();
+    } catch (err) {
+      console.error("Failed to fetch devices:", err);
+      tableBody.innerHTML =
+        `<tr><td colspan="5">Failed to load devices from backend.</td></tr>`;
+    }
+  }
 
-  renderDevices();
+  function renderDevices() {
+    if (devices.length === 0) {
+      tableBody.innerHTML =
+        `<tr><td colspan="5">No devices detected.</td></tr>`;
+      return;
+    }
 
-  deviceTableBody.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-index]');
-    if (!button) return;
+    tableBody.innerHTML = devices.map((device, index) => `
+      <tr>
+        <td>${device.name || "Unknown"}</td>
+        <td>${device.ip || "-"}</td>
+        <td>${device.mac || "-"}</td>
+        <td>${statusBadge(device.status)}</td>
+        <td>
+          <button class="btn btn-danger" data-index="${index}">
+            Block
+          </button>
+        </td>
+      </tr>
+    `).join("");
+  }
 
-    const device = devices[Number(button.dataset.index)];
-    alert(`Device ${device.name} (${device.ip}) has been marked as blocked.`);
-    device.status = 'Risk';
-    renderDevices();
+  function statusBadge(status) {
+    if (status === "Active")
+      return `<span class="status-pill status-active">Active</span>`;
+    if (status === "Idle")
+      return `<span class="status-pill status-idle">Idle</span>`;
+    if (status === "Risk")
+      return `<span class="status-pill status-risk">Risk</span>`;
+    return `<span class="status-pill">Unknown</span>`;
+  }
+
+  tableBody.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-index]");
+    if (!btn) return;
+
+    const device = devices[Number(btn.dataset.index)];
+    if (!device) return;
+
+    if (!confirm(`Block device ${device.name || device.mac}?`)) return;
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mac: device.mac,
+          reason: "Blocked from Connected Devices UI"
+        })
+      });
+
+      if (!res.ok) throw new Error("Block failed");
+
+      alert("Device blocked successfully");
+      fetchDevices();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to block device");
+    }
   });
+
+  // Initial load + auto refresh
+  fetchDevices();
+  setInterval(fetchDevices, 5000);
 });

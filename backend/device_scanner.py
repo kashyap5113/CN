@@ -35,6 +35,8 @@ class DeviceScanner:
                         continue
                     try:
                         network = ipaddress.IPv4Network(f"{ip_addr}/{netmask}", strict=False)
+                        print(f"[DeviceScanner] Scanning network: {network}")
+                        
                         return str(network)
                     except ValueError:
                         continue
