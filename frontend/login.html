@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login | Securing LAN Monitoring System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="login-page">
+  <main class="login-container">
+    <section class="login-card">
+      <h2>Securing LAN Monitoring System</h2>
+      <p class="subtitle">A Computer Networks Semester Project</p>
+      <form id="loginForm" novalidate>
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" placeholder="Enter username" required />
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" placeholder="Enter password" required />
+
+        <p id="loginError" class="error-text" aria-live="polite"></p>
+        <button type="submit" class="btn btn-primary">Login as Admin</button>
+      </form>
+    </section>
+  </main>
+  <script src="js/main.js"></script>
+</body>
+</html>
