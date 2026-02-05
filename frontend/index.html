@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Securing LAN Monitoring System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div><p>Loading network dashboard...</p></div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <h3>LAN Secure UI</h3>
+      <nav>
+        <a href="index.html" class="active">Dashboard</a>
+        <a href="devices.html">Connected Devices</a>
+        <a href="traffic.html">Traffic Analysis</a>
+        <a href="alerts.html">Threat Alerts</a>
+        <a href="blocked.html">Blocked Devices</a>
+        <a href="login.html">Logout</a>
+      </nav>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <button id="sidebarToggle" class="btn btn-light mobile-only">☰</button>
+        <div>
+          <h1>Securing LAN Monitoring System</h1>
+          <p>A Computer Networks Semester Project</p>
+        </div>
+        <div class="topbar-actions">
+          <button id="themeToggle" class="btn btn-light">Dark Mode</button>
+          <button class="btn btn-primary">Export Report</button>
+        </div>
+      </header>
+
+      <p class="demo-note">Demo Data Notice: Detection, alerts, and monitoring values are static mock data for UI demonstration (no backend integration yet).</p>
+
+      <section class="banner warning">⚠ Unauthorized device warning banner: Unknown MAC activity detected.</section>
+      <section class="banner danger">Suspicious traffic notification <span class="blink-dot"></span></section>
+
+      <section class="status-row">
+        <h2>Network Health Status</h2>
+        <p id="liveStatus" class="status secure">🟢 Network Secure</p>
+      </section>
+
+      <section class="card-grid">
+        <article class="card"><h3>Total Devices</h3><p id="totalDevices">0</p></article>
+        <article class="card"><h3>Active Devices</h3><p id="activeDevices">0</p></article>
+        <article class="card"><h3>Threats Detected</h3><p id="threatCount">0</p></article>
+        <article class="card"><h3>Blocked Devices</h3><p id="blockedCount">0</p></article>
+      </section>
+
+      <footer class="footer">
+        <p><strong>Student Name:</strong> Your Name | <strong>Roll No:</strong> 12345 | <strong>Department:</strong> CSE | <strong>College Name:</strong> Your College</p>
+      </footer>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
